@@ -13,7 +13,7 @@
 - [ ] ArtTrigger
 - [x] ArtDmx
 - [ ] ArtSync
-- [ ] ArtNzs
+- [x] ArtNzs
 - [ ] ArtVlc
 - [ ] ArtInput
 - [ ] ArtFirmwareMaster
