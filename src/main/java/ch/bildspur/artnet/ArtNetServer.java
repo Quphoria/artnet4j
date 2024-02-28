@@ -69,6 +69,7 @@ public class ArtNetServer extends ArtNetNode implements Runnable {
 
     public void broadcastPacket(ArtNetPacket ap) {
         try {
+            ap.serializeData();
             DatagramPacket packet = new DatagramPacket(ap.getData(), ap
                     .getLength(), broadCastAddress, sendPort);
             socket.send(packet);
@@ -203,6 +204,7 @@ public class ArtNetServer extends ArtNetNode implements Runnable {
      */
     public void unicastPacket(ArtNetPacket ap, InetAddress targetAdress) {
         try {
+            ap.serializeData();
             DatagramPacket packet = new DatagramPacket(ap.getData(), ap
                     .getLength(), targetAdress, sendPort);
             socket.send(packet);
