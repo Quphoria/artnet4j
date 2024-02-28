@@ -1,0 +1,37 @@
+# TODO
+
+## Packets
+
+- [x] ArtPoll
+- [x] ArtPollReply
+- [ ] ArtIpProg
+- [ ] ArtIpProgReply
+- [ ] ArtAddress
+- [ ] ArtDiagData
+- [x] ArtTimeCode
+- [ ] ArtCommand
+- [ ] ArtTrigger
+- [x] ArtDmx
+- [ ] ArtSync
+- [ ] ArtNzs
+- [ ] ArtVlc
+- [ ] ArtInput
+- [ ] ArtFirmwareMaster
+- [ ] ArtFirmwareReply
+- [ ] ArtTodRequest
+- [ ] ArtTodData
+- [ ] ArtTodControl
+- [ ] ArtRdm
+- [ ] ArtRdmSub
+
+## Tables
+
+- [ ] Opcodes
+- [x] PortType
+- [ ] NodeReportCode
+- [x] NodeStyle
+
+## Other
+
+- [ ] Check targeted mode set when responding in ArtNetServer
+- [ ] Check sending updates when replyOnChanges is set

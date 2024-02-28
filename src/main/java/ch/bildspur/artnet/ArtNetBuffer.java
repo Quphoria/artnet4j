@@ -20,8 +20,9 @@ public class ArtNetBuffer {
         data = new HashMap<>();
     }
 
-    public byte[] getDmxData(short subnet, short universe){
-        int key = hashKeyFromPair(subnet, universe);
+    public byte[] getDmxData(short portAddress)
+    {
+        int key = portAddress;
 
         if(!data.containsKey(key))
             data.put(key, new byte[channelSize]);
@@ -29,20 +30,14 @@ public class ArtNetBuffer {
         return data.get(key);
     }
 
-    public void setDmxData(short subnet, short universe, final byte[] dmxData)
+    public void setDmxData(short portAddress, final byte[] dmxData)
     {
-        data.put(hashKeyFromPair(subnet, universe), dmxData);
+    	int key = portAddress;
+        data.put(key, dmxData);
     }
 
     public void clear()
     {
         data.clear();
-    }
-
-    private static int hashKeyFromPair(short a, short b) {
-        assert a >= 0;
-        assert b >= 0;
-        long sum = (long) a + (long) b;
-        return (int) (sum * (sum + 1) / 2) + a;
     }
 }

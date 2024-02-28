@@ -28,6 +28,9 @@ public abstract class ArtNetPacket {
 
     public static final int PROTOCOL_VERSION = 14;
 
+    public static final int HEADER_LENGTH = 12;
+    protected static int MAX_LENGTH = -1; // Set this in implementing classes
+
     public static final Logger logger =
             Logger.getLogger(ArtNetPacket.class.getClass().getName());
 
@@ -75,6 +78,24 @@ public abstract class ArtNetPacket {
     public abstract boolean parse(byte[] raw);
 
     /**
+     * Writes the fields in the packet into the buffer
+     * Implementing classes will need to set the MAX_LENGTH field,
+     * as well as override this method to add additional fields
+     */
+    public void serializeData() {
+        assert MAX_LENGTH > 0 : "MAX_LENGTH not set";
+
+        data = new ByteUtils(new byte[MAX_LENGTH]);
+
+        // Header
+        data.setByteChunk(HEADER, 0, 8);
+        data.setInt16LE(type.getOpCode(), 8);
+
+        // Protocol
+        data.setInt16(PROTOCOL_VERSION, 10);
+    }
+
+    /**
      * @param data
      *            the data to set
      */
@@ -83,25 +104,12 @@ public abstract class ArtNetPacket {
     }
 
     public void setData(byte[] raw, int maxLength) {
-        if (raw.length > maxLength) {
+        if (raw.length != maxLength) {
             byte[] raw2 = new byte[maxLength];
-            System.arraycopy(raw, 0, raw2, 0, maxLength);
+            System.arraycopy(raw, 0, raw2, 0, Math.min(maxLength, raw.length));
             raw = raw2;
         }
         setData(raw);
-    }
-
-    /**
-     * Sets the header bytes of the packet consisting of {@link #HEADER} and the
-     * type's OpCode.
-     */
-    protected void setHeader() {
-        data.setByteChunk(HEADER, 0, 8);
-        data.setInt16LE(type.getOpCode(), 8);
-    }
-
-    protected void setProtocol() {
-        data.setInt16(PROTOCOL_VERSION, 10);
     }
 
     @Override

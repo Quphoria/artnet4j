@@ -55,7 +55,8 @@ public class DmxUniverse {
     public ArtDmxPacket getPacket(int sequenceID) {
         ArtDmxPacket packet = new ArtDmxPacket();
         packet.setSequenceID(sequenceID);
-        packet.setUniverse(node.getSubNet(), config.universeID);
+        int portAddress = (node.getNet() << 8) | (node.getSubNet() << 4) | (config.universeID & 0xf);
+        packet.setPortAddress(portAddress);
         // FIXME Art-Lynx OP has firmware issue with packet lengths < 512
         // channels
         // packet.setDMX(frameData, config.numDmxChannels);

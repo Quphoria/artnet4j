@@ -19,7 +19,7 @@
 package ch.bildspur.artnet;
 
 public enum PortType {
-    DMX512(0), MIDI(1), AVAB(2), COLORTRAN(3), ADB62_5(4), ARTNET(5);
+    DMX512(0), MIDI(1), AVAB(2), COLORTRAN(3), ADB62_5(4), ARTNET(5), DALI(6);
 
     private int id;
 

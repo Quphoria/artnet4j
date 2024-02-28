@@ -8,7 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import static ch.bildspur.artnet.packets.PacketType.ART_OUTPUT;
+import static ch.bildspur.artnet.packets.PacketType.ART_DMX;
 
 public class ArtNetClient {
     private ArtNetServer server;
@@ -109,24 +109,22 @@ public class ArtNetClient {
 
     /**
      * Send a dmx package as broadcast package.
-     * @param subnet Receiving subnet.
-     * @param universe Receiving universe.
+     * @param portAddress Receiving port address.
      * @param dmxData Dmx data to send.
      */
-    public void broadcastDmx(int subnet, int universe, byte[] dmxData) {
-        server.broadcastPacket(createDmxPacket(subnet, universe, dmxData));
+    public void broadcastDmx(int portAddress, byte[] dmxData) {
+        server.broadcastPacket(createDmxPacket(portAddress, dmxData));
     }
 
     /**
      * Send a dmx package to a specific unicast address.
      * @param address Receiver address.
-     * @param subnet Receiving subnet.
-     * @param universe Receiving universe.
+     * @param portAddress Receiving port address.
      * @param dmxData Dmx data to send.
      */
-    public void unicastDmx(String address, int subnet, int universe, byte[] dmxData) {
+    public void unicastDmx(String address, int portAddress, byte[] dmxData) {
         try {
-            this.unicastDmx(InetAddress.getByName(address), subnet, universe, dmxData);
+            this.unicastDmx(InetAddress.getByName(address), portAddress, dmxData);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -135,29 +133,27 @@ public class ArtNetClient {
     /**
      * Send a dmx package to a specific unicast address.
      * @param node Receiver node.
-     * @param subnet Receiving subnet.
-     * @param universe Receiving universe.
+     * @param portAddress Receiving port address.
      * @param dmxData Dmx data to send.
      */
-    public void unicastDmx(ArtNetNode node, int subnet, int universe, byte[] dmxData) {
-        server.unicastPacket(createDmxPacket(subnet, universe, dmxData), node.getIPAddress());
+    public void unicastDmx(ArtNetNode node, int portAddress, byte[] dmxData) {
+        server.unicastPacket(createDmxPacket(portAddress, dmxData), node.getIPAddress());
     }
 
     /**
      * Send a dmx package to a specific unicast address.
      * @param address Receiver address.
-     * @param subnet Receiving subnet.
-     * @param universe Receiving universe.
+     * @param portAddress Receiving port address.
      * @param dmxData Dmx data to send.
      */
-    public void unicastDmx(InetAddress address, int subnet, int universe, byte[] dmxData) {
-        server.unicastPacket(createDmxPacket(subnet, universe, dmxData), address);
+    public void unicastDmx(InetAddress address, int portAddress, byte[] dmxData) {
+        server.unicastPacket(createDmxPacket(portAddress, dmxData), address);
     }
 
-    private ArtDmxPacket createDmxPacket(int subnet, int universe, byte[] dmxData) {
+    private ArtDmxPacket createDmxPacket(int portAddress, byte[] dmxData) {
         ArtDmxPacket dmx = new ArtDmxPacket();
 
-        dmx.setUniverse(subnet, universe);
+        dmx.setPortAddress(portAddress);
         dmx.setSequenceID(++sequenceId);
         dmx.setDMX(dmxData, dmxData.length);
 
@@ -171,34 +167,31 @@ public class ArtNetClient {
         if (inputBuffer == null)
             return;
 
-        if (packet.getType() != ART_OUTPUT)
+        if (packet.getType() != ART_DMX)
             return;
 
         ArtDmxPacket dmxPacket = (ArtDmxPacket) packet;
-        int subnet = dmxPacket.getSubnetID();
-        int universe = dmxPacket.getUniverseID();
+        short portAddress = (short) dmxPacket.getPortAddress();
 
-        inputBuffer.setDmxData((short) subnet, (short) universe, dmxPacket.getDmxData());
+        inputBuffer.setDmxData(portAddress, dmxPacket.getDmxData());
     }
 
     /**
      * Read dmx data from the buffer implementation.
-     * @param subnet Subnet to read from.
-     * @param universe Universe to read from.
+     * @param portAddress Port address to read from.
      * @return Dmx data array.
      */
-    public byte[] readDmxData(int subnet, int universe) {
-        return readDmxData((short) subnet, (short) universe);
+    public byte[] readDmxData(short portAddress) {
+        return readDmxData(portAddress);
     }
 
     /**
      * Read dmx data from the buffer implementation.
-     * @param subnet Subnet to read from.
-     * @param universe Universe to read from.
+     * @param portAddress Port address to read from.
      * @return Dmx data array.
      */
-    public byte[] readDmxData(short subnet, short universe) {
-        return inputBuffer.getDmxData(subnet, universe);
+    public byte[] readDmxData(int portAddress) {
+        return inputBuffer.getDmxData((short) portAddress);
     }
 
     public ArtNetServer getArtNetServer() {

@@ -35,6 +35,7 @@ public class ArtNetNode {
 
 	private InetAddress ip;
 
+	private int netSwitch;
 	private int subSwitch;
 
 	private int oemCode;
@@ -42,7 +43,7 @@ public class ArtNetNode {
 	private int nodeStatus;
 	private NodeReportCode reportCode;
 
-	private String shortName;
+	private String portName;
 	private String longName;
 
 	private int numPorts;
@@ -70,10 +71,11 @@ public class ArtNetNode {
 
 	public void extractConfig(ArtPollReplyPacket source) {
 		setIPAddress(source.getIPAddress());
+		netSwitch = source.getNetSwitch();
 		subSwitch = source.getSubSwitch();
-		oemCode = source.getOEMCode();
+		oemCode = source.getOemCode();
 		nodeStatus = source.getNodeStatus();
-		shortName = source.getShortName();
+		portName = source.getPortName();
 		longName = source.getLongName();
 		ports = source.getPorts();
 		numPorts = ports.length;
@@ -154,10 +156,14 @@ public class ArtNetNode {
 	}
 
 	/**
-	 * @return the shortName
+	 * @return the portName
 	 */
-	public String getShortName() {
-		return shortName;
+	public String getPortName() {
+		return portName;
+	}
+	
+	public int getNet() {
+		return netSwitch;
 	}
 
 	public int getSubNet() {

@@ -31,7 +31,7 @@ public class ReceiveArtNetSketch extends PApplet {
 
     @Override
     public void draw() {
-       byte[] data = artnet.readDmxData(0, 0);
+       byte[] data = artnet.readDmxData(0);
        background(color(data[0] & 0xFF, data[1] & 0xFF, data[2] & 0xFF));
     }
 

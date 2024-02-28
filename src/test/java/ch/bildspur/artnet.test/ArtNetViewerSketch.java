@@ -19,8 +19,7 @@ public class ArtNetViewerSketch extends PApplet {
 
     ArtNetClient artnet = new ArtNetClient(new ArtNetBuffer(), 8000, 8000);
 
-    int subnet = 0;
-    int universe = 0;
+    int portAddress = 0;
 
     int columns = 32;
     int rows = 512 / columns;
@@ -43,7 +42,7 @@ public class ArtNetViewerSketch extends PApplet {
 
     @Override
     public void draw() {
-       byte[] data = artnet.readDmxData(subnet, universe);
+       byte[] data = artnet.readDmxData(portAddress);
        background(color(data[0] & 0xFF, data[1] & 0xFF, data[2] & 0xFF));
 
         background(55);

@@ -6,7 +6,9 @@ package ch.bildspur.artnet.packets;
  * @author <a href="https://mrexplode.github.io">MrExplode</a>
  *
  */
-public class ArtTimePacket extends ArtNetPacket {
+public class ArtTimeCodePacket extends ArtNetPacket {
+
+    protected static int MAX_LENGTH = HEADER_LENGTH+7;
     
     private int frames;
     private int seconds;
@@ -14,25 +16,10 @@ public class ArtTimePacket extends ArtNetPacket {
     private int hours;
     private int type;
     
-    public ArtTimePacket() {
+    public ArtTimeCodePacket() {
         super(PacketType.ART_TIMECODE);
-        setData(new byte[19]);
-        setHeader();
-        setProtocol();
     }
 
-
-    @Override
-    public boolean parse(byte[] raw) {
-        setData(raw);
-        frames = data.getInt8(14);
-        seconds = data.getInt8(15);
-        minutes = data.getInt8(16);
-        hours = data.getInt8(17);
-        type = data.getInt8(18);
-        return true;
-    }
-    
     /**
      * Set the time in one method.
      * @param hour hours
@@ -45,7 +32,6 @@ public class ArtTimePacket extends ArtNetPacket {
     	this.minutes = min;
     	this.seconds = sec;
     	this.frames = frame;
-    	updateData();
     }
 
     /**
@@ -58,7 +44,6 @@ public class ArtTimePacket extends ArtNetPacket {
     
     public void setFrames(int frames) {
         this.frames = frames;
-        updateData();
     }
 
     /**
@@ -71,7 +56,6 @@ public class ArtTimePacket extends ArtNetPacket {
     
     public void setSeconds(int seconds) {
         this.seconds = seconds;
-        updateData();
     }
 
     /**
@@ -84,7 +68,6 @@ public class ArtTimePacket extends ArtNetPacket {
     
     public void setMinutes(int minutes) {
         this.minutes = minutes;
-        updateData();
     }
 
     /**
@@ -97,7 +80,6 @@ public class ArtTimePacket extends ArtNetPacket {
     
     public void setHours(int hours) {
         this.hours = hours;
-        updateData();
     }
 
     /**
@@ -114,15 +96,29 @@ public class ArtTimePacket extends ArtNetPacket {
      */
     public void setFrameType(int type) {
         this.type = type;
-        updateData();
     }
-    
-    private void updateData() {
+
+    @Override
+    public boolean parse(byte[] raw) {
+        if (raw.length < MAX_LENGTH) return false;
+
+        setData(raw);
+        frames = data.getInt8(14);
+        seconds = data.getInt8(15);
+        minutes = data.getInt8(16);
+        hours = data.getInt8(17);
+        type = data.getInt8(18);
+        return true;
+    }
+
+    @Override
+    public void serializeData() {
+        super.serializeData();
+
         data.setInt8(frames, 14);
         data.setInt8(seconds, 15);
         data.setInt8(minutes, 16);
         data.setInt8(hours, 17);
         data.setInt8(type, 18);
     }
-
 }

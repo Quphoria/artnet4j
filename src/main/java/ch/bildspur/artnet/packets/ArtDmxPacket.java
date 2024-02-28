@@ -4,31 +4,45 @@ import java.util.Arrays;
 
 public class ArtDmxPacket extends ArtNetPacket {
 
-    private int numChannels;
+    protected static int MIN_LENGTH = HEADER_LENGTH+6+2;
+    protected static int MAX_LENGTH = HEADER_LENGTH+6+512;
+
     private int sequenceID;
-    private int subnetID;
-    private int universeID;
+    private int portAddress = 0;
+    private int physicalPort = 0;
+    private int numChannels;
     private byte[] dmxData;
 
     public ArtDmxPacket() {
-        super(PacketType.ART_OUTPUT);
-        setData(new byte[530]);
-        setHeader();
-        setProtocol();
-        data.setInt8(0x02, 13);
+        super(PacketType.ART_DMX);
     }
-
-    public byte[] getDmxData() {
-        return dmxData;
-    }
-
+    
     /**
-     * @return the actual packet size used. If an odd number DMX channels is
-     *         used, the packet size is made even automatically.
+     * @return the sequenceID
      */
-    @Override
-    public int getLength() {
-        return 18 + (1 == numChannels % 2 ? numChannels + 1 : numChannels);
+    public int getSequenceID() {
+        return sequenceID;
+    }
+
+    public void setSequenceID(int id) {
+        sequenceID = id % 0xff;
+    }
+
+    public int getPortAddress() {
+        return portAddress;
+    }
+
+    public void setPortAddress(int portAddress) {
+        this.portAddress = portAddress & 0x7fff;
+        logger.finer("Port Address set to: " + this.portAddress);
+    }
+
+    public int getPhysicalPort() {
+        return physicalPort;
+    }
+
+    public void setPhysicalPort(int physicalPort) {
+        this.physicalPort = physicalPort;
     }
 
     /**
@@ -37,84 +51,43 @@ public class ArtDmxPacket extends ArtNetPacket {
     public int getNumChannels() {
         return numChannels;
     }
-
-    /**
-     * @return the sequenceID
-     */
-    public int getSequenceID() {
-        return sequenceID;
-    }
-
-    /**
-     * @return the subnetID
-     */
-    public int getSubnetID() {
-        return subnetID;
-    }
-
-    /**
-     * @return the universeID
-     */
-    public int getUniverseID() {
-        return universeID;
-    }
-
-    @Override
-    public boolean parse(byte[] raw) {
-        setData(raw);
-        sequenceID = data.getInt8(12);
-        int subnetUniverse = data.getInt8(14);
-        subnetID = subnetUniverse >> 4;
-        universeID = subnetUniverse & 0x0f;
-        numChannels = data.getInt16(16);
-        dmxData = data.getByteChunk(dmxData, 18, numChannels);
-        return true;
+    
+    public byte[] getDmxData() {
+        return dmxData;
     }
 
     public void setDMX(byte[] dmxData, int numChannels) {
         logger.finer("setting DMX data for: " + numChannels + " channels");
         this.dmxData = Arrays.copyOf(dmxData, numChannels);
         this.numChannels = numChannels;
-        data.setByteChunk(dmxData, 18, numChannels);
-        data.setInt16((1 == numChannels % 2 ? numChannels + 1 : numChannels),
-                16);
     }
 
-    /**
-     * @param numChannels
-     *            the number of DMX channels to set
-     */
-    public void setNumChannels(int numChannels) {
-        this.numChannels = numChannels > 512 ? 512 : numChannels;
+    @Override
+    public boolean parse(byte[] raw) {
+        if (raw.length < MIN_LENGTH) return false;
+        setData(raw);
+        sequenceID = data.getInt8(12);
+        physicalPort = data.getInt8(13);
+        portAddress = data.getInt16LE(14) & 0x7fff; // Abstract 15-bit port address, instead of treating separately
+        numChannels = data.getInt16(16);
+        if (18+numChannels > raw.length) return false; // Not enough data
+        dmxData = data.getByteChunk(dmxData, 18, numChannels);
+        return true;
     }
 
-    public void setSequenceID(int id) {
-        sequenceID = id % 0xff;
-        data.setInt8(id, 12);
-    }
+    @Override
+    public void serializeData() {
+        super.serializeData();
+        data.setInt8(sequenceID, 12);
+        data.setInt8(physicalPort, 13);
+        data.setInt16LE(portAddress, 14);
 
-    /**
-     * @param subnetID
-     *            the subnetID to set
-     */
-    public void setSubnetID(int subnetID) {
-        this.subnetID = subnetID & 0x0f;
-    }
+        int adjusted_channels = numChannels;
+        if (adjusted_channels % 2 == 0) adjusted_channels++; // Must be a multiple of 2
+        adjusted_channels = Math.max(2, Math.min(512, adjusted_channels)); // Must be 2-512
 
-    public void setUniverse(int subnetID, int universeID) {
-        this.subnetID = subnetID & 0x0f;
-        this.universeID = universeID & 0x0f;
-        data.setInt16LE(subnetID << 4 | universeID, 14);
-        logger.finer("universe ID set to: subnet: "
-                + ByteUtils.hex(subnetID, 2) + "/"
-                + ByteUtils.hex(universeID, 2));
-    }
-
-    /**
-     * @param universeID
-     *            the universeID to set
-     */
-    public void setUniverseID(int universeID) {
-        this.universeID = universeID & 0x0f;
+        data.setInt16(adjusted_channels, 16);
+        data.setByteChunk(dmxData, 18, Math.min(numChannels, adjusted_channels)); // Only copy channels we have, extra are zero
+        data.setLength(18+adjusted_channels);
     }
 }

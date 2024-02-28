@@ -45,7 +45,7 @@ public class ByteUtils {
 
     protected final byte[] data;
 
-    public final int length;
+    public int length;
 
     public ByteUtils(byte[] data) {
         this.data = data;
@@ -53,7 +53,7 @@ public class ByteUtils {
     }
 
     public boolean compareBytes(byte[] other, int offset, int length) {
-        boolean isEqual = (offset + length) < data.length;
+        boolean isEqual = (offset + length) < this.length;
         for (int i = 0; i < length && isEqual; i++) {
             isEqual = data[offset++] == other[i];
         }
@@ -105,7 +105,21 @@ public class ByteUtils {
     }
 
     public final int getLength() {
-        return data.length;
+        return length;
+    }
+
+    /**
+     * Sets the length of the data bytes,
+     * for reducing the buffer size when the buffer is overallocated
+     * 
+     * @param length The new buffer length
+     */
+    public final void setLength(int length) {
+        assert length <= this.length : "New length cannot be larger than the buffer size";
+
+        if (length > this.length) return;
+
+        this.length = length;
     }
 
     public final void setByteChunk(byte[] buffer, int offset) {

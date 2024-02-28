@@ -42,7 +42,7 @@ public class SendArtNetSketch extends PApplet {
         setRGB(0, c);
 
         // send dmx
-        artnet.unicastDmx(localhostNode, 0, 0, dmxData);
+        artnet.unicastDmx(localhostNode, 0, dmxData);
     }
 
     @Override

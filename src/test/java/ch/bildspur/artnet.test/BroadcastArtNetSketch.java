@@ -40,7 +40,7 @@ public class BroadcastArtNetSketch extends PApplet {
         setRGB(0, c);
 
         // send dmx
-        artnet.broadcastDmx(0, 0, dmxData);
+        artnet.broadcastDmx(0, dmxData);
     }
 
     @Override
