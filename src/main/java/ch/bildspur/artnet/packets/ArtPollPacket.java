@@ -36,7 +36,7 @@ public class ArtPollPacket extends ArtNetPacket {
     private int 	targetPortAddressBottom = 0;
     
     // The following is used to describe the node sending the packet
-	private int 	estaManCode = 0;
+    private int 	estaManCode = 0;
     private int 	oemCode = 0;
 
     public ArtPollPacket() {
@@ -49,7 +49,7 @@ public class ArtPollPacket extends ArtNetPacket {
     }
 
     public boolean isReplyOnChanges() {
-    	return replyOnChanges;
+        return replyOnChanges;
     }
 
     public void setReplyOnChanges(boolean replyOnChanges) {
@@ -57,33 +57,33 @@ public class ArtPollPacket extends ArtNetPacket {
     }
 
     public boolean isDiagnosticsEnabled() {
-    	return diagnosticsEnabled;
+        return diagnosticsEnabled;
     }
     
     public boolean isDiagnosticsUnicast() {
-    	return diagnosticsUnicast;
+        return diagnosticsUnicast;
     }
     
     public int getDiagnosticsPriority() {
-    	return diagnosticsPriority;
+        return diagnosticsPriority;
     }
 
     public void setDiagnostics(boolean enabled, boolean unicast, int priority) {
-    	this.diagnosticsEnabled = enabled;
-    	this.diagnosticsUnicast = unicast;
-    	this.diagnosticsPriority = priority;
+        this.diagnosticsEnabled = enabled;
+        this.diagnosticsUnicast = unicast;
+        this.diagnosticsPriority = priority;
     }
 
     public boolean isVlcTransmissionEnabled() {
-    	return vlcTransmissionEnabled;
+        return vlcTransmissionEnabled;
     }
     
     public void setVlcTransmission(boolean enabled) {
-    	this.vlcTransmissionEnabled = enabled;
+        this.vlcTransmissionEnabled = enabled;
     }
 
     public boolean isTargetedMode() {
-    	return targetedMode;
+        return targetedMode;
     }
 
     public int getTargetPortAddressTop() {
@@ -101,16 +101,16 @@ public class ArtPollPacket extends ArtNetPacket {
     }
 
     public int getOemCode() {
-		return oemCode;
-	}
+        return oemCode;
+    }
 
-	public int getEstaManCode() {
-		return estaManCode;
-	}
+    public int getEstaManCode() {
+        return estaManCode;
+    }
 
     public void setPacketSender(int oemCode, int estaManCode) {
-    	this.oemCode = oemCode;
-    	this.estaManCode = estaManCode;
+        this.oemCode = oemCode;
+        this.estaManCode = estaManCode;
     }
 
     @Override
@@ -140,10 +140,10 @@ public class ArtPollPacket extends ArtNetPacket {
     public void serializeData() {
         super.serializeData();
         data.setInt8(
-      		(replyOnChanges ?           (1<<1) : 0) |
-      		(diagnosticsEnabled ?       (1<<2) : 0) |
-      		(diagnosticsUnicast ?       (1<<3) : 0) |
-      		(vlcTransmissionEnabled ?   (1<<4) : 0) |
+            (replyOnChanges ?           (1<<1) : 0) |
+            (diagnosticsEnabled ?       (1<<2) : 0) |
+            (diagnosticsUnicast ?       (1<<3) : 0) |
+            (vlcTransmissionEnabled ?   (1<<4) : 0) |
             (targetedMode ?             (1<<5) : 0),
         12);
         data.setInt8(diagnosticsPriority, 13);

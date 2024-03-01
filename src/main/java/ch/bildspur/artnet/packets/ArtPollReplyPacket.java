@@ -311,7 +311,7 @@ public class ArtPollReplyPacket extends ArtNetPacket {
 		this.bindIp = bindIp;
 	}
 
-    private void setBindIP(byte[] address) {
+    private void setBindIp(byte[] address) {
         try {
             bindIp = InetAddress.getByAddress(address);
             logger.fine("setting bindip: " + ip);
@@ -430,7 +430,7 @@ public class ArtPollReplyPacket extends ArtNetPacket {
         // The following fields are optional
         // However, the buffer is large enough so they are all just null bytes
 
-        setBindIP(data.getByteChunk(null, 207, 4));
+        setBindIp(data.getByteChunk(null, 207, 4));
         bindIndex = data.getInt8(211);
         status2 = data.getInt8(212);
         goodOutputB = data.getByteChunk(null, 213, 4);
@@ -456,7 +456,7 @@ public class ArtPollReplyPacket extends ArtNetPacket {
         data.setInt16LE(PacketType.ART_POLL_REPLY.getOpCode(), 8);
 
         // ip address
-        data.setByteChunk(ip.getAddress(), 10, ip.getAddress().length);
+        data.setByteChunk(ip.getAddress(), 10, Math.min(4, ip.getAddress().length));
 
         // port
         data.setInt16LE(ArtNetServer.DEFAULT_PORT, 14);
@@ -536,7 +536,7 @@ public class ArtPollReplyPacket extends ArtNetPacket {
         data.setByteChunk(macAddress, 201, Math.min(6, macAddress.length));
 
         // bindip
-        data.setByteChunk(bindIp.getAddress(), 207, bindIp.getAddress().length);
+        data.setByteChunk(bindIp.getAddress(), 207, Math.min(4, bindIp.getAddress().length));
 
         // bindindex
         data.setInt8(bindIndex, 211);
