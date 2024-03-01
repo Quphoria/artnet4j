@@ -25,94 +25,27 @@ import java.util.logging.Level;
 
 import ch.bildspur.artnet.ArtNetServer;
 
-public class ArtIpProg extends ArtNetPacket {
+public class ArtIpProgReplyPacket extends ArtNetPacket {
 
     protected static int MAX_LENGTH = HEADER_LENGTH+22;
 
-    private boolean enableAnyProgramming = false;
-    private boolean enableDHCP = false;
-    private boolean programDefaultGateway = false;
-    private boolean programDefaults = false;
-    private boolean programIPAddress = false;
-    private boolean programSubnetMask = false;
-    private boolean programPort = false;
+    private boolean dhcpEnabled = false;
 
     private InetAddress ip;
     private InetAddress subnetMask;
     private int port = ArtNetServer.DEFAULT_PORT;
     private InetAddress defaultGateway;
 
-    public ArtIpProg() {
+    public ArtIpProgReplyPacket() {
         super(PacketType.ART_IP_PROG);
     }
 
-    public boolean isProgrammingEnabled() {
-        return enableAnyProgramming;
+    public boolean isDHCPEnabled() {
+        return dhcpEnabled;
     }
 
-    public boolean isProgramEnableDHCP() {
-        if (!enableAnyProgramming) return false;
-        return enableDHCP;
-    }
-
-    public boolean isProgramDefaults() {
-        if (!enableAnyProgramming) return false;
-        if (enableDHCP) return false;
-        return programDefaults;
-    }
-
-    public boolean isProgramDefaultGateway() {
-        if (!enableAnyProgramming) return false;
-        if (enableDHCP || programDefaults) return false;
-        return programDefaultGateway;
-    }
-
-    public boolean isProgramIPAddress() {
-        if (!enableAnyProgramming) return false;
-        if (enableDHCP || programDefaults) return false;
-        return programIPAddress;
-    }
-
-    public boolean isProgramSubnetMask() {
-        if (!enableAnyProgramming) return false;
-        if (enableDHCP || programDefaults) return false;
-        return programSubnetMask;
-    }
-
-    @Deprecated
-    public boolean isProgramPort() {
-        if (!enableAnyProgramming) return false;
-        if (enableDHCP || programDefaults) return false;
-        return programPort;
-    }
-
-    public void setProgrammingEnabled(boolean enable) {
-        enableAnyProgramming = enable;
-    }
-
-    public void setProgramEnableDHCP(boolean enable) {
-        enableDHCP = enable;
-    }
-
-    public void setProgramDefaults(boolean program) {
-        programDefaults = program;
-    }
-
-    public void setProgramDefaultGateway(boolean program) {
-        programDefaultGateway = program;
-    }
-
-    public void setProgramIPAddress(boolean program) {
-        programIPAddress = program;
-    }
-
-    public void setProgramSubnetMask(boolean program) {
-        programSubnetMask = program;
-    }
-
-    @Deprecated
-    public void setProgramPort(boolean program) {
-        programPort = program;
+    public void setDHCPEnabled(boolean enabled) {
+        dhcpEnabled = enabled;
     }
 
     public InetAddress getIp() {
@@ -192,39 +125,31 @@ public class ArtIpProg extends ArtNetPacket {
     public boolean parse(byte[] raw) {
         if (raw.length < MAX_LENGTH) return false;
         setData(raw, MAX_LENGTH); // Set buffer size to MAX_LENGTH to fill extra fields with zeros
-        int flags = data.getInt8(14);
-        enableAnyProgramming    = (flags & (1<<7)) != 0;
-        enableDHCP              = (flags & (1<<6)) != 0;
-        programDefaultGateway   = (flags & (1<<4)) != 0;
-        programDefaults         = (flags & (1<<3)) != 0;
-        programIPAddress        = (flags & (1<<2)) != 0;
-        programSubnetMask       = (flags & (1<<1)) != 0;
-        programPort             = (flags & (1<<0)) != 0;
-
+        
         setIp(data.getByteChunk(null, 16, 4));
         setSubnetMask(data.getByteChunk(null, 20, 4));
         port = data.getInt16(24);
-        setDefaultGateway(data.getByteChunk(null, 26, 4));
         
+        int status = data.getInt8(26);
+        dhcpEnabled = (status & (1<<6)) != 0;
+
+        setDefaultGateway(data.getByteChunk(null, 28, 4));
+
         return true;
     }
 
     @Override
     public void serializeData() {
         super.serializeData();
-        data.setInt8(
-            (enableAnyProgramming ?     (1<<7) : 0) |
-            (enableDHCP ?               (1<<6) : 0) |
-            (programDefaultGateway ?    (1<<4) : 0) |
-            (programDefaults ?          (1<<3) : 0) |
-            (programIPAddress ?         (1<<2) : 0) |
-            (programSubnetMask ?        (1<<1) : 0) |
-            (programPort ?              (1<<0) : 0),
-        14);
 
         data.setByteChunk(ip.getAddress(), 16, Math.min(4, ip.getAddress().length));
         data.setByteChunk(subnetMask.getAddress(), 20, Math.min(4, subnetMask.getAddress().length));
         data.setInt16(port, 24);
-        data.setByteChunk(defaultGateway.getAddress(), 26, Math.min(4, defaultGateway.getAddress().length));
+
+        data.setInt8(
+            (dhcpEnabled ? (1<<6) : 0),
+        26);
+
+        data.setByteChunk(defaultGateway.getAddress(), 28, Math.min(4, defaultGateway.getAddress().length));
     }
 }

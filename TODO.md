@@ -5,7 +5,7 @@
 - [x] ArtPoll
 - [x] ArtPollReply
 - [x] ArtIpProg
-- [ ] ArtIpProgReply
+- [x] ArtIpProgReply
 - [ ] ArtAddress
 - [ ] ArtDiagData
 - [x] ArtTimeCode
