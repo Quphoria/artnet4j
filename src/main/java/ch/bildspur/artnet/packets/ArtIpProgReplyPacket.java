@@ -37,7 +37,7 @@ public class ArtIpProgReplyPacket extends ArtNetPacket {
     private InetAddress defaultGateway;
 
     public ArtIpProgReplyPacket() {
-        super(PacketType.ART_IP_PROG);
+        super(PacketType.ART_IP_PROG_REPLY);
     }
 
     public boolean isDHCPEnabled() {
